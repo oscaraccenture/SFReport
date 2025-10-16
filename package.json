@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0"
+  },
+  "name": "javascripttextformatter",
+  "version": "1.0.0",
+  "description": "A simple JavaScript text formatter using Express.js",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node ./src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
