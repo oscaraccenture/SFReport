@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "exceljs": "^4.4.0",
     "express": "^5.1.0"
+    
   },
   "name": "javascripttextformatter",
   "version": "1.0.0",
