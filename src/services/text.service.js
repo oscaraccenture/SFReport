@@ -54,6 +54,16 @@ const formatTextContentSeveralOutcomes = (dataExcel) =>
 const formatTextExpectedOutcome = (dataExcel) =>
     dataExcel.reduce((report, item) => report + promptLineExpectedResult(item), '');
 
+//Better method version using ternary operator to validate if dataExcel is an array, if not return empty string
+/* 
+const formatTextExpectedOutcome1 = (dataExcel = []) =>
+  (Array.isArray(dataExcel) ? dataExcel : []).reduce((report, item) => report + promptLineExpectedResult(item), '');
+
+ */
+
+
+
+
 
 
 export {
