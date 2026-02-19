@@ -1,4 +1,5 @@
 import fs from 'fs';
+import SeveralModel from '../models/sevOutcomes.model.js';
 
 const lineBar = '\n/*****************************************************************/\n';
     const outcomeLines = `\n\nOutcome 1:\n\nOutcome 2:\n\nOutcome 3:\n\nOutcome 4:\n\nOutcome 5:\n\n`;
@@ -63,8 +64,59 @@ const formatTextExpectedOutcome1 = (dataExcel = []) =>
 
 
 
+/* 
+Sheet1: [
+    {
+      'S. No.': 1,
+      Category: '1710118-[TEST] Agentforce - Implementation of Financial Details using Prompt Template - Exe',
+      Role: 'N/A',
+      'Prompt Type': 'N/A'
+    }, 
+*/
 
 
+/* 
+Read the information from the excel file
+Use the class sevOutcomes model
+create an excel file with the information read from the excel file with the format
+outcome 1: lorem ipsum
+outcome 2 lorem ipsum
+
+the method stores the information in an array of objects with the format of the class several Outcomes
+myArray = [
+     {
+      'S. No.': 1,
+      Category: '1710118-[TEST] Agentforce - Implementation of Financial Details using Prompt Template - Exe',
+      Role: 'N/A',
+      'Prompt Type': 'N/A',
+      'utterance': 'Sample Utterance',
+      'outcome 1': 'Sample outcome 1',
+      ...
+      'outcome 5': 'Sample outcome 5'
+     }
+]
+*/
+
+const formatDataToSeveralOutcomesModel = (dataExcel) => {
+    const dataArray = [];
+    dataArray.push(dataExcel.map(item => new SeveralModel(
+        item['S. No.'],
+        item['Category'],
+        item['Role'],
+        item['Prompt Type'],
+        item['Utterance'],
+        item['Outcome 1'],
+        item['Outcome 2'],
+        item['Outcome 3'],
+        item['Outcome 4'],
+        item['Outcome 5']
+    )));
+    return dataArray;
+}
+
+/* 
+const myArray = text.split(/outcome\s[0-9]\W/);
+*/
 
 export {
     readTextFile,
