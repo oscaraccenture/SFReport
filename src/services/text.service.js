@@ -97,6 +97,8 @@ myArray = [
 ]
 */
 
+
+//Array to store the information and pass it to the method to create the excel file with the format of several outcomes
 const formatDataToSeveralOutcomesModel = (dataExcel) => {
     const dataArray = [];
     dataArray.push(dataExcel.map(item => new SeveralModel(
@@ -112,6 +114,12 @@ const formatDataToSeveralOutcomesModel = (dataExcel) => {
         item['Outcome 5']
     )));
     return dataArray;
+}
+
+//Method to read the excel file and return the information in the format of the class several outcomes
+
+const formatDataSeveralOutcomes = (data) => {
+    
 }
 
 /* 

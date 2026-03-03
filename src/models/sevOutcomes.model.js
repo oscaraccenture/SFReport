@@ -18,4 +18,7 @@ class severalOutcomesModel  {
         this.outcome4 = outcome4;
         this.outcome5 = outcome5;
     }
+
 }
+
+export default severalOutcomesModel;
