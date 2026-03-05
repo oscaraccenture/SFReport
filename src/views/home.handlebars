@@ -1,0 +1,27 @@
+<h1>{{title}}</h1>
+
+<p>{{mensaje}}</p>
+
+<hr />
+
+<h2>Subir Archivo EXCEL o TXT</h2>
+
+<form action='/upload' method='post' enctype='multipart/form-data'>
+  <input type='file' name='file' required />
+  <br /><br />
+  <button type='submit'>Subir Archivo</button>
+</form>
+
+{{#if file}}
+  <p class='messageSuccess'>
+    Archivo subido correctamente:
+    <strong> {{file}}</strong>
+  </p>
+{{/if}}
+
+{{#if error}}
+  <p class='messageFail'>
+    Error:
+    {{error}}
+  </p>
+{{/if}}
