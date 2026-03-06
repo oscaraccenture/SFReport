@@ -1,0 +1,35 @@
+<h1>Vista previa del archivo Excel</h1>
+<p><strong>Archivo:</strong>{{file}}</p>
+<p><strong>Hoja:</strong>{{sheet}}</p>
+
+<p><a href='/'> 🔙 Volver</a></p>
+
+<hr />
+
+{{#if rows.length}}
+  <table border='1' cellpadding='6' cellspacing='0'>
+    <tbody>
+      {{#each rows}}
+        <tr>
+          {{#each this}}
+            <td>{{this}}</td>
+          {{/each}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+{{else}}
+  <p>No se encontraron filas para mostrar</p>
+{{/if}}
+
+{{#if error}}
+  <p class='messageFail'> Error: {{error}}</p>
+{{/if}}
+
+{{#if txtFile}}
+  <p>
+    <a href='/download/{{txtFile}}'>
+      📋⏬ Descargar Reporte TXT
+    </a>
+  </p>
+{{/if}}
