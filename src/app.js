@@ -87,10 +87,75 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     //If the file is ext TXT, just confirmation (It's gonna be used strongly afterward)
 
     if (ext === ".txt") {
+      const txtPath = path.join(__dirname, 'uploads', req.file.filename);
+      
+      const content = fs.readFileSync(txtPath, 'utf8');
+
+      console.log("=======================================");
+      console.log("Showing the txt CONTENT");
+      console.log(content);
+      console.log("=======================================");
+
+      const lines = content
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line=> line.length>0);
+
+
+
+      if (lines.length === 0){
+        return res.render('home', {
+          title: 'Mi primer sitio con Express + Handlebars bro TXT',
+          message: 'El archivo TXT esta vacio, rayos',
+          error: 'No hay contenido para procesar'
+        });
+      }
+
+      
+
+      console.log("=======================================");
+      console.log("BEFORE WORKING WITH ROWS");
+      console.log(lines);
+      console.log("=======================================");
+      // Parsing columns
+      const rows = lines
+                  .map(line => 
+                        line.split('|')
+                        .map(col => col.trim())
+      );
+
+
+      console.log("=======================================");
+      console.log("Mostrando las lineas obtenidas del txt");
+      console.log(rows);
+      console.log("=======================================");
+
+      //Create the excel file
+      const workbook = new exceljs.Workbook();
+      const worksheet = workbook.addWorksheet('Datos desde Txt mayumba');
+
+      //headers
+      worksheet.addRow(rows[0]);
+
+      //Data
+      for (let i=1; i < rows.length; i++){
+        worksheet.addRow(rows[i]);
+        console.log(rows[i]);
+        console.log("Row added correctly");
+      }
+
+
+      //Save the excel file
+      const excelFileName = req.file.filename.replace('.txt', '.xlsx');
+      const excelPath = path.join(__dirname, 'excels', excelFileName);
+
+      await workbook.xlsx.writeFile(excelPath);
+
       return res.render("home", {
-        title: "Mi primer sitio con express + handlebars bro",
-        message: "TXT subido con exito",
-        file: req.file.filename,
+        title: "Mi primer sitio con express + handlebars bro == guardar TXT a Excel",
+        message: "Excel generado correctamente desde TXT",
+        file: excelFileName,
+        excelFile: excelFileName
       });
     }
 
@@ -148,6 +213,12 @@ app.get('/download/:filename', (req, res) => {
   const filePath = path.join(__dirname, 'reports', req.params.filename);
   res.download(filePath);
 })
+
+//Route to download the excel file from txt
+app.get('/download-excel/:filename', (req, res) => {
+  const filePath = path.join(__dirname, 'excels', req.params.filename);
+  res.download(filePath);
+});
 
 const startServer = async (req, res) => {
   app.listen(port, () => {
