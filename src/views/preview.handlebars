@@ -4,10 +4,25 @@
 
 <p><a href='/'> 🔙 Volver</a></p>
 
+{{#if txtFile}}
+  <p>
+    <a href='/download/{{txtFile}}'>
+      📋⏬ Descargar Reporte TXT
+    </a>
+  </p>
+{{/if}}
+
 <hr />
 
 {{#if rows.length}}
   <table border='1' cellpadding='6' cellspacing='0'>
+    <thead>
+      <tr>
+        {{#each headers}}
+          <th>{{this}}</th>
+        {{/each}}
+      </tr>
+    </thead>
     <tbody>
       {{#each rows}}
         <tr>
@@ -24,12 +39,4 @@
 
 {{#if error}}
   <p class='messageFail'> Error: {{error}}</p>
-{{/if}}
-
-{{#if txtFile}}
-  <p>
-    <a href='/download/{{txtFile}}'>
-      📋⏬ Descargar Reporte TXT
-    </a>
-  </p>
 {{/if}}
