@@ -54,24 +54,6 @@ app.get("/", (req, res) => {
   });
 });
 
-/* 
-app.post('/upload', upload.single('file'), (req, res) => {
-    if (!req.file) {
-      return res.render('home', {
-        title: 'Mi primer sitio con Express + Handlebars',
-        mensaje: 'Error al subir archivo',
-        error: 'No se recibió ningún archivo'
-      });
-    }
-  
-    res.render('home', {
-      title: 'Mi primer sitio con Express + Handlebars',
-      mensaje: 'Archivo subido con éxito',
-      file: req.file.filename
-    });
-}); 
-*/
-
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
@@ -90,12 +72,6 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       const txtPath = path.join(__dirname, 'uploads', req.file.filename);
       
       const content = fs.readFileSync(txtPath, 'utf8');
-
-      console.log("=======================================");
-      console.log("Showing the txt CONTENT");
-      console.log(content);
-      console.log("=======================================");
-
       const lines = content
                     .split('\n')
                     .map(line => line.trim())
@@ -111,24 +87,12 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         });
       }
 
-      
-
-      console.log("=======================================");
-      console.log("BEFORE WORKING WITH ROWS");
-      console.log(lines);
-      console.log("=======================================");
       // Parsing columns
       const rows = lines
                   .map(line => 
                         line.split('|')
                         .map(col => col.trim())
       );
-
-
-      console.log("=======================================");
-      console.log("Mostrando las lineas obtenidas del txt");
-      console.log(rows);
-      console.log("=======================================");
 
       //Create the excel file
       const workbook = new exceljs.Workbook();
@@ -219,6 +183,9 @@ app.get('/download-excel/:filename', (req, res) => {
   const filePath = path.join(__dirname, 'excels', req.params.filename);
   res.download(filePath);
 });
+
+//** End Routes */
+
 
 const startServer = async (req, res) => {
   app.listen(port, () => {
