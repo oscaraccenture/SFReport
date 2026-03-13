@@ -1,0 +1,40 @@
+{
+  "txt": {
+    "delimiter": "|",
+    "trimCells": true
+  },
+  "excel": {
+    "sheetIndex": 1,
+    "headerRow": 1
+    },
+    "requiredHeaders": [
+      "S.No",
+      "Prompt",
+      "1 Outcome"
+    ],
+    "columns": {
+      "S.No": {
+        "type": "number",
+        "required": true
+      },
+      "Prompt": {
+        "type": "string",
+        "required": true,
+        "minLength": 1
+      },
+      "1 Outcome": {
+        "type": "string",
+        "required": true,
+        "min": 1
+      }
+  },
+  "headerAliases": {
+    "s.no": "S.No",
+    "S.NO": "S.No",
+    "prompt": "Prompt",
+    "Utterance": "Prompt",
+    "1 outcome": "1 Outcome",
+    "outcome 1": "1 Outcome",
+    "Outcome 1": "1 Outcome"
+  }
+}

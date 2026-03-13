@@ -8,17 +8,111 @@ import exceljs from 'exceljs';
 import fs from 'fs';
 import textHelper from './helpers/textHelper.js';
 
+import Ajv from 'ajv';
+
 //Experimental CODE
 import excelService from './services/excel.service.js'
 import dirService from './services/dir.service.js'
 import { arch } from 'os'
+
+//** End of Experimental CODE Importation*/
 
 const app = express()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.join(path.dirname(__filename), '..')
 
 handlebarsConfig(app)
-const port = 3000
+const port = 3000;
+
+/* 
+Ajv validation Rules
+*/
+
+function loadJson (filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(raw);
+}
+
+function loadAndValidateRules(){
+  const rulesPath = path.join(__dirname, 'config', 'rules.json');
+  const schemaPath = path.join(__dirname, 'config', 'rules.schema.json');
+
+  const rules = loadJson(rulesPath);
+  const schema = loadJson(schemaPath);
+
+  const ajv = new Ajv({ allErrors: true, strict: false});
+  const validate = ajv.compile(schema);
+
+  const ok = validate(rules);
+  if (!ok){
+    const msg = validate.errors.map(e => `${e.instancePath} ${e.message}`).join(' | ');
+    throw new Error(`rules.json invalido: ${msg}`);
+  }
+  return rules;
+}
+
+//Charge the rules once at the beginning (if it changes, reboot the server)
+const RULES = loadAndValidateRules();
+
+
+
+//Helper function rules
+function normalizeHeader(h, rules){
+  /* 
+  The ?? operator in JavaScript is the nullish coalescing operator. It is a logical operator that returns its right-hand side 
+  operand when its left-hand side operand is null or undefined, and otherwise returns its left-hand side operand.
+   */
+  const raw = String(h ?? '').trim(); 
+  return rules.headerAliases[raw] || raw;
+}
+
+function buildHeaderMap(fileHeaders, rules){
+  //Normalize headers from the file (EXCEL, TXT) to valid ones or canonical
+  const normalized = fileHeaders.map(h => normalizeHeader(h,rules));
+
+  //validate mandatory headers
+  const missing = rules.requiredHeaders.filter(req => !normalized.includes(req));
+  return { normalized, missing};
+}
+
+function validateRowObject(rowObj, rules, rowNumber){
+  const errors = [];
+
+  for (const [colName, colRules] of Object.entries(rules.columns)){
+    const value = rowObj[colName];
+
+    if (colRules.required){
+      const empty = value === undefined || value === null || String(value).trim() === '';
+      if (empty){
+        errors.push(`Fila ${rowNumber}:  "${colName}" es obligatorio`);
+        continue;
+      }
+    }
+
+    if (value !== undefined && value !== null && String(value).trim() != ''){
+      if (colRules.type === 'number'){
+        const num = Number(value);
+        if (Number.isNaN(num)) errors.push(`Fila ${rowNumber}: "${colName}" debe ser numerico`);
+        if (colRules.min !== undefined && s.trim().length < colRules.minLength){
+          errors.push(`Fila ${rowNumber}: "${colName}" minimo ${colRules.minLength} caracteres`);
+        }
+      }
+    }
+  }
+  return errors;
+
+}
+
+
+
+//**End of Helper function rules
+
+/* 
+End of Ajv validation Rules
+*/
+
+
+
 
 //Multer
 const storage = multer.diskStorage({
@@ -66,7 +160,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
     const ext = path.extname(req.file.originalname).toLowerCase()
 
-    //If the file is ext TXT
+    // =========================================================================================//
+    //If the file is extension .TXT
 
     if (ext === '.txt') {
       const txtPath = path.join(__dirname, 'uploads', req.file.filename)
@@ -166,18 +261,38 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         excelFile: excelFileName
       })
     }
+    // =================================+++++++==================================================//
 
+    // =========================================================================================//
     //If the file is xlxs: read it with ExcelJs from the hardisk
     const filePath = path.join(__dirname, 'uploads', req.file.filename)
 
-    const workbook = new exceljs.Workbook()
-    await workbook.xlsx.readFile(filePath)
+    const workbook = new exceljs.Workbook();
+    await workbook.xlsx.readFile(filePath);
 
-    const worksheet = workbook.getWorksheet(1)
+    const worksheet = workbook.getWorksheet(1);
+
+    // new header validations
+    const headerRow = worksheet.getRow(RULES.excel.headerRow);
+    const fileHeaders = headerRow.values.slice(1);
+    const { normalized: headers, missing } = buildHeaderMap(fileHeaders, RULES);
+
+    if (missing.length > 0){
+      return res.render('preview', {
+        file: req.file.filename,
+        sheet: worksheet.name,
+        rows: [],
+        error: `Faltan columnas obligatorias: ${missing.join(', ')}`
+      });
+    }
+
+
+    //** End of new header validations */
+
 
     //Header validations
-    const headerRow = worksheet.getRow(1)
-    const headers = headerRow.values.slice(1).map(textHelper.cellToText);
+    //const headerRow = worksheet.getRow(1);
+    //const headers = headerRow.values.slice(1).map(textHelper.cellToText);
 
     const REQUIRED_HEADERS = ['S.No', 'Prompt', '1 Outcome']
 
@@ -204,7 +319,39 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       })
     }
 
-    //Validation data for each row
+    // New validation data for each row using RULES Ajv
+    const rows = [];
+    let txtContent = '';
+    const errors = [];
+
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber === RULES.excel.headerRow) return //skip the header
+
+      const values = row.values.slice(1);
+      const rowObj = {};
+      headers.forEach((h,i) => rowObj[h] = values[i]);
+
+      errors.push(...validateRowObject(rowObj, RULES, rowNumber));
+
+      const line = headers.map(h => rowObj[h] ?? '').join(` ${RULES.txt.delimiter}`);
+      txtContent += line + '\n';
+      rows.push(headers.map(h => rowObj[h] ?? ''));
+    });
+
+    if (errors.length > 0){
+      return res.render('preview', {
+        file: req.file.filename,
+        sheet: worksheet.name,
+        rows: [],
+        error: errors.slice(0,15).join(' — ') + (errors.length > 15 ? ` — (+${errors.length - 15} mas)` : '')
+      });
+    }
+
+
+    //**End of   New validation data for each row using RULES Ajv*/
+
+    //Validation data for each row --Old One, without rules--
+    /* 
     const COLUMN_TYPES = {
       'S.No': 'number',
       'Prompt': 'string',
@@ -255,7 +402,10 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         rows: [],
         errors: errors.join(' -- ')
       })
-    }
+    } */
+
+
+
     /* 
       //rowNumber usually is an array. Suggestion: ignore the 0 index if it comes empty
       const values = Array.isArray(row.values) ? row.values.slice(1) : [];
@@ -266,8 +416,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       txtContent += cleanValues.join('|' + '\n');
     }); */
 
-    const txtFileName = req.file.filename.replace('.xlsx', '.txt')
-    const txtFilePath = path.join(__dirname, 'reports', txtFileName)
+    const txtFileName = req.file.filename.replace('.xlsx', '.txt');
+    const txtFilePath = path.join(__dirname, 'reports', txtFileName);
     fs.writeFileSync(txtFilePath, txtContent, 'utf8')
 
     return res.render('preview', {
@@ -286,6 +436,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     })
   }
 })
+// =================================+++++++==================================================//
+
 
 app.get('/download/:filename', (req, res) => {
   const filePath = path.join(__dirname, 'reports', req.params.filename)

@@ -1,0 +1,92 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "txt",
+    "excel",
+    "requiredHeaders",
+    "columns",
+    "headerAliases"
+  ],
+  "properties": {
+    "txt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delimiter",
+        "trimCells"
+      ],
+      "properties": {
+        "delimiter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trimCells": {
+          "type": "boolean"
+        }
+      }
+    },
+    "excel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sheetIndex",
+        "headerRow"
+      ],
+      "properties": {
+        "sheetIndex": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "headerRow": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "requiredHeaders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "columns": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "required"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "minLength": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "min": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "headerAliases": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}
