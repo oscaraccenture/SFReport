@@ -2,13 +2,15 @@ import { textFormatters } from './services/main.service.js';
 import express from 'express';
 import handlebarsConfig from './config/handlebarsConfig.js';
 import { fileURLToPath } from 'url';
-import path from 'path';
 import multer from 'multer';
 import exceljs from 'exceljs';
+
 import fs from 'fs';
+import Ajv from 'ajv';
+import path from 'path';
+
 import textHelper from './helpers/textHelper.js';
 
-import Ajv from 'ajv';
 
 //Experimental CODE
 import excelService from './services/excel.service.js'
@@ -28,10 +30,15 @@ const port = 3000;
 Ajv validation Rules
 */
 
+
+//Already Moved
 function loadJson (filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   return JSON.parse(raw);
 }
+//**Already Moved
+
+
 
 function loadAndValidateRules(){
   const rulesPath = path.join(__dirname, 'config', 'rules.json');
@@ -55,7 +62,7 @@ function loadAndValidateRules(){
 const RULES = loadAndValidateRules();
 
 
-
+//Already Moved
 //Helper function rules
 function normalizeHeader(h, rules){
   /* 
@@ -65,7 +72,11 @@ function normalizeHeader(h, rules){
   const raw = String(h ?? '').trim(); 
   return rules.headerAliases[raw] || raw;
 }
+//**Already Moved
 
+
+
+//Already Moved
 function buildHeaderMap(fileHeaders, rules){
   //Normalize headers from the file (EXCEL, TXT) to valid ones or canonical
   const normalized = fileHeaders.map(h => normalizeHeader(h,rules));
@@ -74,6 +85,11 @@ function buildHeaderMap(fileHeaders, rules){
   const missing = rules.requiredHeaders.filter(req => !normalized.includes(req));
   return { normalized, missing};
 }
+//**Already Moved
+
+
+
+
 
 function validateRowObject(rowObj, rules, rowNumber){
   const errors = [];
@@ -111,7 +127,7 @@ function validateRowObject(rowObj, rules, rowNumber){
 End of Ajv validation Rules
 */
 
-
+//**Already Moved
 
 
 //Multer

@@ -1,5 +1,34 @@
 import ExcelJS from 'exceljs';
-import fs from 'fs';
+
+async function readExcel(filePath, rules){
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(filePath);
+
+    const sheet = workbook.getWorksheet(rules.excel.sheetIndex);
+    if( !sheet) throw new Error('Hoja no encontrada');
+
+    return sheet;
+}
+
+async function writeExcel(headers, rows, outputPath){
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Datos');
+
+    ws.addRow(headers);
+    rows.forEach(r => ws.addRow(r));
+
+    await wb.xlsx.writeFile(outputPath);
+}
+
+const excelService ={
+    readExcel,
+    writeExcel
+}
+
+export default excelService;
+
+
+/* import fs from 'fs';
 
 
 const readExcelFile = async (filePath) => {
@@ -84,4 +113,4 @@ const excelService = {
 }
 
 
-export default excelService;
+export default excelService; */

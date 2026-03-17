@@ -1,7 +1,47 @@
 import fs from 'fs';
+
+function readTxt(filePath, delimiter, trim){
+    const content = fs.readFileSync(filePath, 'utf8');
+    return content
+            .split('\n')
+            .map(l => trim ? l.trim() : l)
+            .filter(Boolean)
+            .map(line => line.split(delimiter).map(c => trim ? c.trim() : c));
+}
+
+function writeTxt(headers, rows, delimiter, outputPath){
+    let txt = headers.join(` ${delimiter} `) + '\n';
+    rows.forEach(r => {
+        txt += r.join(` ${delimiter} `) + '\n';
+    });
+    fs.writeFileSync(outputPath, txt, 'utf8');
+}
+
+const textService = {
+    readTxt,
+    writeTxt
+}
+
+export default textService;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 
+
 import SeveralModel from '../models/sevOutcomes.model.js';
 
-const lineBar = '\n/*****************************************************************/\n';
+//const lineBar = '\n/*****************************************************************\n';
     const outcomeLines = `\n\nOutcome 1:\n\nOutcome 2:\n\nOutcome 3:\n\nOutcome 4:\n\nOutcome 5:\n\n`;
     const outcomeLinesSame = `\n\nOutcome 1:\n\nOutcome 2:\nsame as outcome 1\n\nOutcome 3:\nsame as outcome 1\n\nOutcome 4:\nsame as outcome 1\n\nOutcome 5:\nsame as outcome 1\n\n`;
     const queryInfoLines = `\n\nQuery 1:\n\nQuery 2:\n\nObservations:\n\nIssue Category:\n\nQuery used to retrieve the expected results:\n\n`;
@@ -34,7 +74,7 @@ const promptLine = (item) =>{
 Columns: 
 Expected Result 
 Sample Prompt Outcome
-*/
+
 
 const promptLineExpectedResult = (item) =>{
     return `${lineBar}\nPermission/Role:\n\n${item['Role']}\n\nPrompt Nro:\n\n${item['S. No.']}\n\nTab/Category:\n\n${item['Category']} \n\nPrompt Type: \n\n${item['Prompt Type']}\n\nPrompt:\n\n${item['Utterance']}\n\nExpected Answer:\n\n ${item['Expected Result']}\n\n Outcomes:\n\n${outcomeLinesSame}\n ${queryInfoLines}\n${lineBar}`;
@@ -60,11 +100,11 @@ const formatTextExpectedOutcome = (dataExcel) =>
 const formatTextExpectedOutcome1 = (dataExcel = []) =>
   (Array.isArray(dataExcel) ? dataExcel : []).reduce((report, item) => report + promptLineExpectedResult(item), '');
 
- */
 
 
 
-/* 
+
+
 Sheet1: [
     {
       'S. No.': 1,
@@ -72,7 +112,7 @@ Sheet1: [
       Role: 'N/A',
       'Prompt Type': 'N/A'
     }, 
-*/
+
 
 
 /* 
@@ -95,7 +135,7 @@ myArray = [
       'outcome 5': 'Sample outcome 5'
      }
 ]
-*/
+
 
 
 //Array to store the information and pass it to the method to create the excel file with the format of several outcomes
@@ -122,9 +162,9 @@ const formatDataSeveralOutcomes = (data) => {
     
 }
 
-/* 
-const myArray = text.split(/outcome\s[0-9]\W/);
-*/
+ 
+//const myArray = text.split(/outcome\s[0-9]\W/);
+
 
 export {
     readTextFile,
@@ -133,3 +173,4 @@ export {
     formatTextContentSeveralOutcomes,
     formatTextExpectedOutcome
 }
+*/
